@@ -1,7 +1,10 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins, Josefin_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import {Toaster} from "react-hot-toast"
+import ReduxProvider from "./Provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,13 +38,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       {/* Keep <body> static for SSR */}
       <body
         className={`${geistSans.variable ?? ""} ${geistMono.variable ?? ""} ${poppins.variable ?? ""} ${josefinSans.variable ?? ""} antialiased`}
       >
+        <Toaster />
         {/* ThemeProvider handles dark mode on client only */}
-        <ThemeProvider
+        <ReduxProvider>
+          <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
@@ -49,6 +54,7 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

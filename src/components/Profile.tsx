@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import React from "react";
 import {
   Avatar,
@@ -14,22 +14,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+
 type ProfileProps = {
   avatar: string;
-  fullname: string;
+  fullName: string;
   email: string;
+  id?: string;
 };
 
-const ProfileDropdown = ({ avatar, fullname, email }: Partial<ProfileProps>) => {
+const ProfileDropdown = ({ avatar, fullName, email, id }: Partial<ProfileProps>) => {
+
+  const router = useRouter()
+  const nameSlug = fullName?.toLowerCase().replace(/\s+/g, "-");
+  // useSelector(user?.avatar?.url)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="p-0 rounded-full">
           <Avatar className="">
             {avatar ? (
-              <AvatarImage src={avatar} alt={fullname || "User"} />
+              <AvatarImage
+                src={avatar}
+                alt={fullName || "User"}
+                className="w-full h-full object-cover"
+              />
+
             ) : (
-              <AvatarFallback>{(fullname || "User")[0]}</AvatarFallback>
+              <AvatarFallback>{(fullName || "User")[0]}</AvatarFallback>
             )}
           </Avatar>
         </Button>
@@ -38,12 +49,15 @@ const ProfileDropdown = ({ avatar, fullname, email }: Partial<ProfileProps>) => 
       <DropdownMenuContent align="end" className="w-56">
         {/* User Info */}
         <div className="flex flex-col items-start p-4 border-b border-gray-200 dark:border-gray-700">
-          <span className="font-semibold dark:text-white">{fullname || "User"}</span>
-          <span className="text-sm text-gray-500 dark:text-gray-300">{email || "@mail"}</span>
+          <span className="font-semibold dark:text-white ">{fullName || "User"}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-300 truncate block w-40">
+            {email || "@mail"}
+          </span>
+
         </div>
 
         {/* Dropdown Actions */}
-        <DropdownMenuItem onClick={() => console.log("View Profile")}>
+        <DropdownMenuItem onClick={() => router.push(`/${nameSlug}/${id}`)}>
           View Profile
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => console.log("Settings")}>

@@ -7,15 +7,33 @@ import { FiMenu, FiX } from "react-icons/fi";
 import { ModeToggle } from "./ModeToggle";
 import Profile from "./Profile";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
+import LoginComp from "./auth/Login.component";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/store";
+import { useMyProfileQuery } from "@/redux/features/auth/authApi";
 
 type Props = {
   activeItem: number;
+
 };
 
-const Header = ({ activeItem }: Props) => {
+const Header = ({ activeItem, }: Props) => {
   const [active, setActive] = useState(false);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const [isLogedIn, setIsLoggedIn] = useState<boolean>(false);
+
+
+  const { data: userQuery } = useMyProfileQuery();
+  const { user } = useSelector((state: RootState) => state.auth);
+  console.log(user)
+
+  useEffect(()=>{
+    if(user||userQuery){
+      setIsLoggedIn(!!user || !!userQuery)
+    }
+  },[user,userQuery])
 
   // Scroll effect
   useEffect(() => {
@@ -34,6 +52,9 @@ const Header = ({ activeItem }: Props) => {
     if (open) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
+
+
+
 
   return (
     <header
@@ -54,28 +75,42 @@ const Header = ({ activeItem }: Props) => {
         <nav className="hidden lg:flex items-center space-x-6">
           <Navitems activeItem={activeItem} isMobile={false} />
           <ModeToggle />
-          <Profile
-            avatar="https://i.pravatar.cc/150?img=3"
-            fullname="Rahul Kumar"
-            email="rahul@example.com"
-          />
+          {
+            isLogedIn && <Profile
+              avatar={user?.avatar?.url}
+              fullName={user?.fullName}
+              email={user?.email}
+              id={user?._id||""}
+            />
+          }
+          {
+            !isLogedIn && <LoginComp />
+          }
         </nav>
 
         {/* Mobile */}
         <div className="lg:hidden flex items-center gap-4">
           <ModeToggle />
-          <Profile
-            avatar="https://i.pravatar.cc/150?img=3"
-            fullname="Rahul Kumar"
-            email="rahul@example.com"
-          />
+          {
+            isLogedIn && <Profile
+              avatar={user?.avatar?.url}
+              fullName={user?.fullName}
+              id={user?._id||""}
+              email={user?.email} />
+              
+
+          }
+          {
+            !isLogedIn && <LoginComp />
+          }
+
           {
             !open && <button
-            onClick={() => setOpen(!open)}
-            className="text-2xl text-black dark:text-white"
-          >
-            {open ? <FiX /> : <FiMenu />}
-          </button>
+              onClick={() => setOpen(!open)}
+              className="text-2xl text-black dark:text-white"
+            >
+              {open ? <FiX /> : <FiMenu />}
+            </button>
           }
         </div>
       </div>
