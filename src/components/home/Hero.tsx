@@ -40,7 +40,7 @@ const Hero = () => {
         >
            <div className="lg:w-80 lg:h-80 w-full max-w-lg overflow-hidden shadow-2xl rounded-full">
             <img
-              src="/hero.png" // replace with your illustration
+              src="/hero-image.png" // replace with your illustration
               alt="Hero Illustration"
               className="w-full h-auto"
             />

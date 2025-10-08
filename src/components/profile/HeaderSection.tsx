@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, ChangeEvent, useRef } from "react";
+import React, { useState, ChangeEvent, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,10 @@ type Props = {
   isVerified?: boolean;
   role?: string;
   onSave?: (data: { fullName: string; avatar: File | string }) => void;
+  isLoading: boolean
 };
 
-const HeaderSection = ({ fullName, avatar, onSave, role, isActive, isVerified }: Props) => {
+const HeaderSection = ({ fullName, avatar, onSave, role, isActive, isVerified, isLoading }: Props) => {
   const [isEdit, setIsEdit] = useState(false);
   const [name, setName] = useState(fullName);
   const [selectedImage, setSelectedImage] = useState<string | File>(avatar);
@@ -41,9 +42,15 @@ const HeaderSection = ({ fullName, avatar, onSave, role, isActive, isVerified }:
     }
   };
 
+  useEffect(() => {
+    if (!isLoading) {
+      setIsEdit(false)
+    }
+  }, [isLoading])
+
   const handleSave = () => {
     if (onSave) onSave({ fullName: name, avatar: selectedImage });
-    setIsEdit(false);
+    ;
   };
 
   return (
@@ -76,8 +83,8 @@ const HeaderSection = ({ fullName, avatar, onSave, role, isActive, isVerified }:
             className="object-cover"
           />
           {isEdit && (
-            <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-full">
-              <FaEdit className="text-white text-lg" />
+            <div className="absolute inset-0 top-0  bg-transparent bg-opacity-30 flex items-center justify-center rounded-full">
+              <FaEdit className="text-black text-lg" />
             </div>
           )}
         </div>
@@ -107,38 +114,41 @@ const HeaderSection = ({ fullName, avatar, onSave, role, isActive, isVerified }:
                 size="sm"
                 className="mt-2 w-fit bg-green-600 hover:bg-green-700 text-white"
                 onClick={handleSave}
+                disabled={isLoading}
               >
-                Save
+                {
+                  isLoading ? " Saving..." : " Save"
+                }
               </Button>
             </>
           ) : (
-          
+
             <div className="flex flex-col gap-1">
-  {/* Name */}
-  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{name}</p>
+              {/* Name */}
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{name}</p>
 
-  {/* Role and Active Status */}
-  <div className="flex items-center gap-2 flex-wrap">
-    {role && (
-      <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 text-sm font-medium rounded-full">
-        {role}
-      </span>
-    )}
-    {isActive && (
-      <span className="px-2 py-0.5 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 text-sm font-medium rounded-full flex items-center gap-1">
-        <span className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse"></span>
-        Active
-      </span>
-    )}
-  </div>
+              {/* Role and Active Status */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {role && (
+                  <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 text-sm font-medium rounded-full">
+                    {role}
+                  </span>
+                )}
+                {isActive && (
+                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 text-sm font-medium rounded-full flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse"></span>
+                    Active
+                  </span>
+                )}
+              </div>
 
-  {/* Verified Badge */}
-  {isVerified && (
-    <span className="mt-1 inline-flex items-center gap-1 text-green-600 dark:text-green-400 text-sm font-semibold">
-      <MdOutlineVerifiedUser /> Verified
-    </span>
-  )}
-</div>
+              {/* Verified Badge */}
+              {isVerified && (
+                <span className="mt-1 inline-flex items-center gap-1 text-green-600 dark:text-green-400 text-sm font-semibold">
+                  <MdOutlineVerifiedUser /> Verified
+                </span>
+              )}
+            </div>
 
           )}
         </div>

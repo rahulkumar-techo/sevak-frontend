@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 export type Address = {
   type: "Point";
@@ -14,15 +15,16 @@ export type Address = {
   country?: string;
   postalCode?: string;
   landmark?: string;
-  placeId?: string;
 };
 
 type Props = {
   initialAddress?: Address;
   onSave?: (address: Address) => void;
+  isLoading: boolean;
+  error: any
 };
 
-const AddressSection = ({ initialAddress, onSave }: Props) => {
+const AddressSection = ({ initialAddress, onSave, isLoading, error }: Props) => {
   const [isEdit, setIsEdit] = useState(false);
   const [address, setAddress] = useState<Address>({
     type: "Point",
@@ -30,9 +32,29 @@ const AddressSection = ({ initialAddress, onSave }: Props) => {
     ...initialAddress,
   });
 
-  const handleSave = () => {
-    onSave?.(address);
-    setIsEdit(false);
+  useEffect(() => {
+    if (error) {
+      const errmsg = error?.data?.message || "Somewent wrong";
+      toast.error(errmsg)
+    }
+
+    if(!isLoading){
+      setIsEdit(false)
+    }
+  }, [error,isLoading])
+
+  
+    const handleSave = () => {
+  onSave?.({
+    ...address,
+    address: address.address?.trim(),
+    city: address.city?.trim(),
+    state: address.state?.trim(),
+    country: address.country?.trim(),
+    postalCode: address.postalCode?.trim(),
+    landmark: address.landmark?.trim(),
+  });
+
   };
 
   const inputClass =
@@ -94,8 +116,11 @@ const AddressSection = ({ initialAddress, onSave }: Props) => {
             <Button
               className="bg-green-600 hover:bg-green-700 text-white mt-4"
               onClick={handleSave}
+              disabled={isLoading}
             >
-              Save Address
+              {
+                isLoading ? "  Save Address..." : "  Save Address"
+              }
             </Button>
           </div>
         ) : (

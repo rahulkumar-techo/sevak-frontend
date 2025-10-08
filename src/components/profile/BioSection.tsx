@@ -1,17 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 type Props = {
   onSave?: (bio: string) => void;
   initialBio?: string;
+  isLoading: boolean
 };
 
-const BioSection = ({ onSave, initialBio = "" }: Props) => {
+const BioSection = ({ onSave, initialBio = "", isLoading }: Props) => {
   const [isEdit, setIsEdit] = useState(false);
   const [bio, setBio] = useState(initialBio);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsEdit(false);
+    }
+  }, [isLoading])
 
   const handleSave = () => {
     onSave?.(bio);
@@ -47,8 +54,11 @@ const BioSection = ({ onSave, initialBio = "" }: Props) => {
               size="sm"
               className="w-fit bg-green-600 hover:bg-green-700 text-white"
               onClick={handleSave}
+              disabled={isLoading}
             >
-              Save
+              {
+                isLoading ? "Saving..." : "Save"
+              }
             </Button>
           </div>
         ) : (

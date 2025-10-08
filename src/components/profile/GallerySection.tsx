@@ -1,28 +1,32 @@
 "use client";
 
-import React, { useState, ChangeEvent, useRef } from "react";
+import React, { useState, ChangeEvent, useRef, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useCompressFiles, CompressedFile } from "@/hooks/useCompressFiles";
 
-type FileItem = {
+export type FileItem = {
   file: File;
   url: string;
-  fileId: string; // could be backend ID or file name
+  fileId: string;
 };
 
 type Props = {
   galleryPhotos: FileItem[];
   videos: FileItem[];
   onSave?: (data: {
-    images: File[];
-    videos: File[];
+    images: FileItem[];
+    videos: FileItem[];
     deletedFileIds: string[];
   }) => void;
-  isLoading:boolean
+  isLoading: boolean;
 };
 
-const GallerySection = ({ galleryPhotos, videos, onSave,isLoading }: Props) => {
+const MAX_IMG = 5;
+const MAX_VID = 5;
+
+const GallerySection = ({ galleryPhotos, videos, onSave, isLoading }: Props) => {
   const [images, setImages] = useState<FileItem[]>(galleryPhotos);
   const [videoList, setVideoList] = useState<FileItem[]>(videos);
   const [isEdit, setIsEdit] = useState(false);
@@ -33,59 +37,57 @@ const GallerySection = ({ galleryPhotos, videos, onSave,isLoading }: Props) => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
-  // 🖼️ Handle new images
+  const { compressImages, isCompressing } = useCompressFiles();
+
+  useEffect(() => setImages(galleryPhotos), [galleryPhotos]);
+  useEffect(() => setVideoList(videos), [videos]);
+  useEffect(() => { if (!isLoading) setIsEdit(false); }, [isLoading]);
+
+  const handleFiles = async (files: File[], type: "image" | "video") => {
+    if (!files.length) return;
+
+    if (type === "image" && images.length + files.length > MAX_IMG) {
+      alert(`You can upload maximum ${MAX_IMG} images`);
+      return;
+    }
+    if (type === "video" && videoList.length + files.length > MAX_VID) {
+      alert(`You can upload maximum ${MAX_VID} videos`);
+      return;
+    }
+
+    // compress only images
+    const processedFiles = type === "image" ? await compressImages(files) : files;
+
+    const newItems: FileItem[] = processedFiles.map(file => ({
+      file,
+      url: URL.createObjectURL(file),
+      fileId: file.name,
+    }));
+
+    type === "image" ? setImages(prev => [...prev, ...newItems]) : setVideoList(prev => [...prev, ...newItems]);
+  };
+
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    const newFiles = Array.from(files);
-
-    const newImages = newFiles.map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-      fileId: file.name,
-    }));
-
-    setImages((prev) => [...prev, ...newImages]);
+    if (!e.target.files) return;
+    handleFiles(Array.from(e.target.files), "image");
   };
 
-  // 🎥 Handle new videos
   const handleVideoChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    const newFiles = Array.from(files);
-
-    const newVideos = newFiles.map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-      fileId: file.name,
-    }));
-
-    setVideoList((prev) => [...prev, ...newVideos]);
+    if (!e.target.files) return;
+    handleFiles(Array.from(e.target.files), "video");
   };
 
-  // ❌ Remove image
-  const removeImage = (fileId: string) => {
-    setDeletedFileIds((prev) => [...prev, fileId]);
-    setImages(images.filter((img) => img.fileId !== fileId));
+  const removeFile = (fileId: string, type: "image" | "video") => {
+    setDeletedFileIds(prev => [...prev, fileId]);
+    type === "image" ? setImages(images.filter(img => img.fileId !== fileId))
+                      : setVideoList(videoList.filter(vid => vid.fileId !== fileId));
   };
 
-  // ❌ Remove video
-  const removeVideo = (fileId: string) => {
-    setDeletedFileIds((prev) => [...prev, fileId]);
-    setVideoList(videoList.filter((vid) => vid.fileId !== fileId));
-  };
-
-  // 💾 Save changes
   const handleSave = () => {
-    const imageFiles = images.map((img) => img.file);
-    const videoFiles = videoList.map((vid) => vid.file);
-
-    onSave?.({ images: imageFiles, videos: videoFiles, deletedFileIds });
+    onSave?.({ images, videos: videoList, deletedFileIds });
     setDeletedFileIds([]);
-    setIsEdit(false);
   };
 
-  // ↩️ Cancel edit
   const handleCancel = () => {
     setImages(galleryPhotos);
     setVideoList(videos);
@@ -99,98 +101,56 @@ const GallerySection = ({ galleryPhotos, videos, onSave,isLoading }: Props) => {
         <CardTitle className="text-lg text-gray-900 dark:text-gray-100">Gallery & Videos</CardTitle>
         {isEdit ? (
           <div className="flex gap-2">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => imageInputRef.current?.click()}>
-              Add Images
-            </Button>
-            <Button size="sm" className="bg-purple-600 hover:bg-purple-700" onClick={() => videoInputRef.current?.click()}>
-              Add Videos
-            </Button>
+            <Button size="sm" onClick={() => imageInputRef.current?.click()}>Add Images</Button>
+            <Button size="sm" onClick={() => videoInputRef.current?.click()}>Add Videos</Button>
           </div>
-        ) : (
-          <Button size="sm" className="bg-purple-600 hover:bg-purple-700" onClick={() => setIsEdit(true)}>
-            Edit
-          </Button>
-        )}
+        ) : <Button size="sm" onClick={() => setIsEdit(true)}>Edit</Button>}
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6 pt-2">
-        {/* 🖼️ Images */}
-        {images.length > 0 && (
+        {/* Images */}
+        {images&&images.length > 0 && (
           <div>
-            <p className="text-gray-700 dark:text-gray-300 mb-2 font-medium">Images</p>
+            <p className="font-medium mb-2">Images</p>
             <div className="grid grid-cols-3 gap-2">
-              {(showAllImages ? images : images.slice(0, 3)).map((img) => (
-                <div key={img.fileId} className="relative w-full h-24 rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700 group hover:shadow-lg transition">
-                  <Image src={img.url} alt="Gallery Image" fill className="object-cover" />
-                  {isEdit && (
-                    <button
-                      onClick={() => removeImage(img.fileId)}
-                      className="absolute top-1 right-1 text-red-500 bg-gray-800 rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                      title="Delete Image"
-                    >
-                      ✕
-                    </button>
-                  )}
+              {(showAllImages ? images : images.slice(0, 3)).map(img => (
+                <div key={img.fileId} className="relative w-full h-24 rounded-xl overflow-hidden border group hover:shadow-lg">
+                  <Image src={img.url} alt="Gallery" fill className="object-cover" />
+                  {isEdit && <button onClick={() => removeFile(img.fileId, "image")} className="absolute top-1 right-1 text-red-500 bg-gray-800 p-1 rounded-full opacity-0 group-hover:opacity-100">✕</button>}
                 </div>
               ))}
-              {!showAllImages && images.length > 3 && (
-                <div
-                  className="relative w-full h-24 rounded-xl bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-black dark:text-white font-semibold text-lg cursor-pointer"
-                  onClick={() => setShowAllImages(true)}
-                >
-                  +{images.length - 3} more
-                </div>
-              )}
+              {!showAllImages && images.length > 3 && <div onClick={() => setShowAllImages(true)} className="cursor-pointer rounded-xl bg-gray-300 dark:bg-gray-700 flex items-center justify-center">{`+${images.length - 3} more`}</div>}
             </div>
           </div>
         )}
 
-        {/* 🎥 Videos */}
-        {videoList.length > 0 && (
+        {/* Videos */}
+        {videoList&&videoList.length > 0 && (
           <div>
-            <p className="text-gray-700 dark:text-gray-300 mb-2 font-medium">Videos</p>
+            <p className="font-medium mb-2">Videos</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {(showAllVideos ? videoList : videoList.slice(0, 3)).map((vid) => (
-                <div key={vid.fileId} className="relative w-full h-32 rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700 bg-black group hover:shadow-lg transition">
+              {(showAllVideos ? videoList : videoList.slice(0, 3)).map(vid => (
+                <div key={vid.fileId} className="relative w-full h-32 rounded-xl overflow-hidden border bg-black group hover:shadow-lg">
                   <video src={vid.url} controls className="w-full h-full object-cover rounded-xl" />
-                  {isEdit && (
-                    <button
-                      onClick={() => removeVideo(vid.fileId)}
-                      className="absolute top-1 right-1 text-red-500 bg-gray-800 rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                      title="Delete Video"
-                    >
-                      ✕
-                    </button>
-                  )}
+                  {isEdit && <button onClick={() => removeFile(vid.fileId, "video")} className="absolute top-1 right-1 text-red-500 bg-gray-800 p-1 rounded-full opacity-0 group-hover:opacity-100">✕</button>}
                 </div>
               ))}
-              {!showAllVideos && videoList.length > 3 && (
-                <div
-                  className="relative w-full h-32 rounded-xl bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-black dark:text-white font-semibold text-lg cursor-pointer"
-                  onClick={() => setShowAllVideos(true)}
-                >
-                  +{videoList.length - 3} more
-                </div>
-              )}
+              {!showAllVideos && videoList.length > 3 && <div onClick={() => setShowAllVideos(true)} className="cursor-pointer rounded-xl bg-gray-300 dark:bg-gray-700 flex items-center justify-center">{`+${videoList.length - 3} more`}</div>}
             </div>
           </div>
         )}
 
-        {/* ✅ Action Buttons */}
+        {/* Action Buttons */}
         {isEdit && (
           <div className="flex flex-col sm:flex-row gap-2 mt-4 justify-end">
-            <Button className="bg-gray-700 hover:bg-gray-600 flex-1 sm:flex-auto" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-auto" onClick={handleSave} disabled={isLoading}>
-             {
-              isLoading ?" Save Changing...":" Save Changes"
-             }
+            <Button className="bg-gray-700 hover:bg-gray-600" onClick={handleCancel}>Cancel</Button>
+            <Button className="bg-green-600 hover:bg-green-700" onClick={handleSave} disabled={isLoading || isCompressing}>
+              {isLoading || isCompressing ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         )}
 
-        {/* Hidden Inputs */}
+        {/* Hidden inputs */}
         <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
         <input ref={videoInputRef} type="file" accept="video/*" multiple onChange={handleVideoChange} className="hidden" />
       </CardContent>

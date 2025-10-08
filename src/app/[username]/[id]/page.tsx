@@ -11,15 +11,13 @@ import FullScreenLoader from "@/components/loaders/FullScreenLoader";
 
 
 const ProfilePage = () => {
-  const { data } = useProfileDataQuery();
+  const { data:profile } = useProfileDataQuery();
   const { user } = useSelector((state: RootState) => state.auth);
-
-
 
   return (
     <>
       {user ? (
-        <ProfileContent user={user} />
+        <ProfileContent user={profile?.data||user} />
       ) : (
         <FullScreenLoader />
       )}

@@ -8,6 +8,7 @@ import { useMyProfileQuery } from "@/redux/features/auth/authApi";
 import { useSelector } from "react-redux";
 import { RootState } from "./store";
 import FullScreenLoader from "@/components/loaders/FullScreenLoader";
+import SevakIntro from "@/components/home/SevakIntro";
 
 type Props = {};
 
@@ -37,6 +38,7 @@ const Page = (props: Props) => {
         // use userQuery if slice not updated yet
       />
       <Hero />
+      <SevakIntro/>
     </div>
   );
 };

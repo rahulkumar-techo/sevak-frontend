@@ -66,8 +66,8 @@ export const authApi = apiSlice.injectEndpoints({
         url:"/auth/me",
         method:"GET",
         credentials:"include"
-      })
-      , async onQueryStarted(args, { queryFulfilled, dispatch }) {
+      }),providesTags: ["UserProfile"],
+       async onQueryStarted(args, { queryFulfilled, dispatch }) {
         try {
           const { data } = await queryFulfilled;
           console.log(data)

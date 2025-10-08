@@ -27,7 +27,7 @@ const Header = ({ activeItem, }: Props) => {
 
   const { data: userQuery } = useMyProfileQuery();
   const { user } = useSelector((state: RootState) => state.auth);
-  console.log(user)
+
 
   useEffect(()=>{
     if(user||userQuery){

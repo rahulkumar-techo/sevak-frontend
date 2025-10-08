@@ -1,29 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 export type Preferences = {
   notifications: boolean;
   theme: "light" | "dark" | "system";
+
 };
 
 type Props = {
   preferences?: Preferences;
+  isLoading?: boolean;
+  error?: any;
+  isSuccess?: boolean;
   onSave?: (data: Preferences) => void;
 };
 
-const PreferencesSection = ({ preferences, onSave }: Props) => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(preferences?.notifications ?? true);
+const PreferencesSection = ({ preferences, onSave ,isLoading,isSuccess,error}: Props) => {
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(preferences?.notifications ?? true);
   const [theme, setTheme] = useState<"light" | "dark" | "system">(preferences?.theme ?? "system");
   const [isEditing, setIsEditing] = useState(false);
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Bio updateSuccessfully")
+      setIsEditing(false);
+    }
+    if (error) {
+      const msg = error?.data?.message || "failed to update"
+      toast.error(msg)
+    }
+  }, [error])
+
+
 
   const handleSave = () => {
+   
     onSave?.({ notifications: notificationsEnabled, theme });
-    setIsEditing(false);
+
   };
 
   const handleCancel = () => {
@@ -91,8 +109,11 @@ const PreferencesSection = ({ preferences, onSave }: Props) => {
               size="sm"
               className="bg-green-600 hover:bg-green-700 text-white"
               onClick={handleSave}
+              disabled={isLoading}
             >
-              Save
+              {
+                isLoading ? "Saving..." : "Save"
+              }
             </Button>
           </div>
         )}
