@@ -69,7 +69,7 @@ const HeaderSection = ({ fullName, avatar, onSave, role, isActive, isVerified, i
         </Button>
       </CardHeader>
 
-      <CardContent className="flex items-center gap-6 pt-2">
+      <CardContent className="flex items-center flex-wrap md:flex-nowrap gap-6 pt-2">
         {/* Avatar */}
         <div
           onClick={handleImageClick}
@@ -101,7 +101,7 @@ const HeaderSection = ({ fullName, avatar, onSave, role, isActive, isVerified, i
         )}
 
         {/* Name and Save */}
-        <div className="flex-1 flex flex-col gap-2">
+        <div className="flex-1 flex flex-col flex-nowrap gap-2">
           {isEdit ? (
             <>
               <Input
@@ -123,7 +123,7 @@ const HeaderSection = ({ fullName, avatar, onSave, role, isActive, isVerified, i
             </>
           ) : (
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 flex-wrap">
               {/* Name */}
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{name}</p>
 

@@ -27,14 +27,19 @@ const PreferencesSection = ({ preferences, onSave ,isLoading,isSuccess,error}: P
   const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
     if (isSuccess) {
-      toast.success("Bio updateSuccessfully")
+      toast.success("Preferences updateSuccessfully")
       setIsEditing(false);
     }
     if (error) {
       const msg = error?.data?.message || "failed to update"
       toast.error(msg)
     }
-  }, [error])
+
+    if(preferences?.notifications||preferences?.theme ){
+      setNotificationsEnabled(preferences?.notifications)
+      setTheme(preferences?.theme )
+    }
+  }, [error,preferences?.notifications,preferences?.theme ])
 
 
 

@@ -41,7 +41,10 @@ const AddressSection = ({ initialAddress, onSave, isLoading, error }: Props) => 
     if(!isLoading){
       setIsEdit(false)
     }
-  }, [error,isLoading])
+    if(initialAddress){
+      setAddress(initialAddress)
+    }
+  }, [error,isLoading,initialAddress])
 
   
     const handleSave = () => {

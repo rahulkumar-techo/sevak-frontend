@@ -75,7 +75,7 @@ const ProfileContent = ({ user }: { user: any }) => {
         theme: "light",
     };
 
-    console.log(user?.galleryPhotos, user?.videos)
+    console.log(user)
 
     return (
         <>
@@ -118,7 +118,7 @@ const ProfileContent = ({ user }: { user: any }) => {
                         {/* Preferences Section */}
                         <PreferencesSection
                             onSave={handlePreferencesSave}
-                            preferences={initialPreferences}
+                            preferences={user?.preferences ||initialPreferences}
                             isLoading={preferencesLoading}
                             isSuccess={preferencesSuccess}
                             error={preferencesError}
