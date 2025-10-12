@@ -61,13 +61,13 @@ export const authApi = apiSlice.injectEndpoints({
       }
     }
     ),
-    myProfile:builder.query<any,void>({
-      query:()=>({
-        url:"/auth/me",
-        method:"GET",
-        credentials:"include"
-      }),providesTags: ["UserProfile"],
-       async onQueryStarted(args, { queryFulfilled, dispatch }) {
+    myProfile: builder.query<any, void>({
+      query: () => ({
+        url: "/auth/me",
+        method: "GET",
+        credentials: "include"
+      }), providesTags: ["UserProfile"],
+      async onQueryStarted(args, { queryFulfilled, dispatch }) {
         try {
           const { data } = await queryFulfilled;
           console.log(data)
@@ -76,11 +76,30 @@ export const authApi = apiSlice.injectEndpoints({
             dispatch(setUser({ user: data?.data }));
           }
         } catch (error) {
-          console.error("Registration failed:", error);
+          console.error("get profile failed:", error);
         }
       }
+    }),
+    logOut: builder.mutation<any, void>({
+      query: () => ({
+        url: "/auth/logout", method: "POST",
+        credentials: "include"
+      }),
+      invalidatesTags: ["UserProfile"],
+      async onQueryStarted(args, { queryFulfilled, dispatch }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data?.data) {
+            //       // Dispatch to update authSlice
+            dispatch(setUser({ user: null }));
+          }
+        } catch (error) {
+          console.error("Logout failed:", error);
+        }
+      }
+
     })
   }),
 });
 
-export const { useRegisterMutation,useEmailVerificationMutation,useUserLoginApiMutation ,useMyProfileQuery} = authApi;
+export const { useRegisterMutation, useEmailVerificationMutation, useUserLoginApiMutation, useMyProfileQuery ,useLogOutMutation} = authApi;

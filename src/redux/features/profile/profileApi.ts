@@ -7,7 +7,7 @@ type FileItem = {
     fileId: string; // could be backend ID or file name
 };
 
-const appendFilesToFormData = (formData: FormData, fieldName: string, items: FileItem[] | undefined) => {
+export const appendFilesToFormData = (formData: FormData, fieldName: string, items: FileItem[] | undefined) => {
     if (!items?.length) return;
     items.filter((i): i is FileItem => !!i?.file).forEach((item) => formData.append(fieldName, item.file));
 };

@@ -20,7 +20,7 @@ type Props = {
     videos: FileItem[];
     deletedFileIds: string[];
   }) => void;
-  isLoading: boolean;
+  isLoading?: boolean;
 };
 
 const MAX_IMG = 5;

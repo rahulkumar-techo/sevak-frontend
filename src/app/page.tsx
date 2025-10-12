@@ -21,10 +21,9 @@ const Page = (props: Props) => {
   // Get global auth state from slice
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
 
-
   // Optional: show loading state while fetching
   if (isLoading) return <FullScreenLoader/>;
-  if (isError) return <p>Failed to fetch user</p>;
+  // if (isError) return <p>Failed to fetch user</p>;
 
   return (
     <div>

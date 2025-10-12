@@ -10,7 +10,7 @@ export const apiSlice = createApi({
     baseQuery:fetchBaseQuery({
         baseUrl:"http://localhost:5000" ,
     }),endpoints:(builder)=>({}),
-     tagTypes: ["UserProfile"],
+     tagTypes: ["UserProfile","job"],
 })
 
 export const {}= apiSlice;

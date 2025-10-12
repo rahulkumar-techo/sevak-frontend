@@ -14,6 +14,11 @@ const BioSection = ({ onSave, initialBio = "", isLoading }: Props) => {
   const [isEdit, setIsEdit] = useState(false);
   const [bio, setBio] = useState(initialBio);
 
+    // ✅ Update local state when initialBio changes
+  useEffect(() => {
+    setBio(initialBio || "");
+  }, [initialBio]);
+
   useEffect(() => {
     if (!isLoading) {
       setIsEdit(false);

@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+- Optimized Mediator Utility
 
-## Getting Started
+---  /utils/mediator.js:
 
-First, run the development server:
+```
+const translate = require("@vitalets/google-translate-api");
+const franc = require("franc");
+const { getCache, setCache } = require("./cache");
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+// Detect language using franc
+function detectLanguage(text) {
+  if (!text) return "en";
+  const langCode = franc(text, { minLength: 3 });
+  if (langCode === "hin") return "hi";
+  return "en"; // default English
+}
+
+// Translate single text if needed
+async function translateIfNeeded(text, preferredLang) {
+  if (!text) return text;
+
+  const cacheKey = `translate:${text}:${preferredLang}`;
+  const cached = await getCache(cacheKey);
+  if (cached) return cached;
+
+  const detectedLang = detectLanguage(text);
+  if (detectedLang === preferredLang) return text;
+
+  try {
+    const res = await translate(text, { from: detectedLang, to: preferredLang });
+    await setCache(cacheKey, res.text, 3600); // cache 1 hour
+    return res.text;
+  } catch (err) {
+    console.error("Translation error:", err);
+    return text;
+  }
+}
+
+// Translate only required fields of a single object
+async function translateObjectFields(obj, preferredLang, fields = ["title", "description"]) {
+  const result = { ...obj };
+  for (const key of fields) {
+    if (result[key]) result[key] = await translateIfNeeded(result[key], preferredLang);
+  }
+  return result;
+}
+
+// Translate arrays of objects efficiently
+async function translateArray(arr, preferredLang, fields = ["title", "description"]) {
+  return Promise.all(arr.map(item => translateObjectFields(item, preferredLang, fields)));
+}
+
+module.exports = { translateIfNeeded, translateObjectFields, translateArray };
+
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Job Routes with Optimized Mediator
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+/routes/job.routes.js:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+const express = require("express");
+const router = express.Router();
+const { Job } = require("../models/job.model");
+const { translateArray } = require("../utils/mediator");
 
-## Learn More
+// Create Job (store original input)
+router.post("/", async (req, res) => {
+  try {
+    const { title, description, jobType, location } = req.body;
+    const job = await Job.create({ title, description, jobType, location, createdBy: req.user._id });
+    res.status(201).json(job);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to create job" });
+  }
+});
 
-To learn more about Next.js, take a look at the following resources:
+// Get Jobs (translate only necessary fields)
+router.get("/", async (req, res) => {
+  try {
+    const preferredLang = req.query.lang || "en";
+    const jobs = await Job.find();
+    
+    const translatedJobs = await translateArray(jobs.map(j => j.toObject()), preferredLang, ["title", "description"]);
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    res.json(translatedJobs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch jobs" });
+  }
+});
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+module.exports = router;
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```

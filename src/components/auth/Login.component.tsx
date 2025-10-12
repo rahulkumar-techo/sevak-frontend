@@ -31,10 +31,10 @@ export default function LoginComp() {
         ((error as any)?.data?.message) || "Something went wrong";
       toast.error(registerError);
     }
-     if (isSuccess) {
+    if (isSuccess) {
       setOpen(false);
     }
-  }, [error,isSuccess]);
+  }, [error, isSuccess]);
 
 
 
@@ -42,9 +42,9 @@ export default function LoginComp() {
     loginUser({ email: data?.email, password: data.password });
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Google login clicked");
-    // TODO: Integrate Google OAuth here
+  const handleGoogleLogin = async () => {
+    window.location.href = "http://localhost:5000/auth/google";
+
   };
 
   return (

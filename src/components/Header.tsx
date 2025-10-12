@@ -28,12 +28,13 @@ const Header = ({ activeItem, }: Props) => {
   const { data: userQuery } = useMyProfileQuery();
   const { user } = useSelector((state: RootState) => state.auth);
 
+  console.log("userQuery===========>", userQuery, user)
 
-  useEffect(()=>{
-    if(user||userQuery){
+  useEffect(() => {
+    if (user || userQuery) {
       setIsLoggedIn(!!user || !!userQuery)
     }
-  },[user,userQuery])
+  }, [user, userQuery])
 
   // Scroll effect
   useEffect(() => {
@@ -74,13 +75,14 @@ const Header = ({ activeItem, }: Props) => {
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center space-x-6">
           <Navitems activeItem={activeItem} isMobile={false} />
-          <ModeToggle />
+          <ModeToggle theme="" />
           {
             isLogedIn && <Profile
               avatar={user?.avatar?.url}
               fullName={user?.fullName}
               email={user?.email}
-              id={user?._id||""}
+              id={user?._id || ""}
+              roles={user?.roles}
             />
           }
           {
@@ -90,13 +92,15 @@ const Header = ({ activeItem, }: Props) => {
 
         {/* Mobile */}
         <div className="lg:hidden flex items-center gap-4">
-          <ModeToggle />
+          <ModeToggle theme="" />
           {
             isLogedIn && <Profile
               avatar={user?.avatar?.url}
               fullName={user?.fullName}
-              id={user?._id||""}
-              email={user?.email} />
+              id={user?._id || ""}
+              email={user?.email} 
+              roles={user?.roles}
+              />
               
 
           }

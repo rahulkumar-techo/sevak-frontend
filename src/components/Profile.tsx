@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLogOutMutation } from "@/redux/features/auth/authApi";
 
 
 type ProfileProps = {
@@ -20,13 +21,39 @@ type ProfileProps = {
   fullName: string;
   email: string;
   id?: string;
+  roles?: string[]
 };
 
-const ProfileDropdown = ({ avatar, fullName, email, id }: Partial<ProfileProps>) => {
+const ProfileDropdown = ({ avatar, fullName, email, id, roles }: Partial<ProfileProps>) => {
 
   const router = useRouter()
   const nameSlug = fullName?.toLowerCase().replace(/\s+/g, "-");
   // useSelector(user?.avatar?.url)
+  const [logoutUser, { isLoading }] = useLogOutMutation()
+  const handleLogOut = async () => {
+    try {
+      await logoutUser().unwrap(); // triggers logout
+      router.push("/"); // redirect after logout
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  }
+
+  console.log(roles)
+  const handleDashboard = () => {
+    if (roles?.includes("admin")) {
+      router.push("/dashboard/admin"); // redirect after logout
+
+    }
+    if (roles?.includes("user")) {
+      router.push("/dashboard/user"); // redirect after logout
+
+    }
+    if (roles?.includes("provider")) {
+      router.push("/dashboard/provider"); // redirect after logout
+    }
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -63,7 +90,10 @@ const ProfileDropdown = ({ avatar, fullName, email, id }: Partial<ProfileProps>)
         <DropdownMenuItem onClick={() => console.log("Settings")}>
           Settings
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => console.log("Logout")}>
+        <DropdownMenuItem onClick={handleDashboard}>
+          Dashboard
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogOut}>
           Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
