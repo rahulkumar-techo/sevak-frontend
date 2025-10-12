@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { jobFormSchema, JobFormValues } from "../schemas/job.schema";
@@ -31,9 +31,10 @@ import LocationInput from "./provider-comp/LocationInputs";
 type Props = {
   initialJobFormData?: Partial<JobFormValues>;
   onSubmitForm: (values: JobFormValues) => void;
+  onPreviewChange?: (values: Partial<JobFormValues>) => void;
 };
 
-const JobForm = ({ initialJobFormData, onSubmitForm }: Props) => {
+const JobForm = ({ initialJobFormData, onSubmitForm, onPreviewChange }: Props) => {
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema) as any, // temporary cast for type mismatch safety
     defaultValues: {
@@ -55,6 +56,14 @@ const JobForm = ({ initialJobFormData, onSubmitForm }: Props) => {
       distanceLimit: initialJobFormData?.distanceLimit ?? 20,
     },
   });
+  const { control, handleSubmit, watch } = form;
+useEffect(() => {
+  const subscription = watch((values) => {
+   onPreviewChange?.(values as JobFormValues); 
+  });
+  return () => subscription.unsubscribe();
+}, [watch, onPreviewChange]);
+
 
   const onSubmit: SubmitHandler<JobFormValues> = (values) => {
     console.log("✅ Form submission data:", values);
