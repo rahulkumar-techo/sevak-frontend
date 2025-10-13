@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Calendar, User, Wallet, Flag, Layers } from "lucide-react";
 import JobMedia from "./JobMedia";
 
-interface ILocation { latitude: number; longitude: number; address?: string; }
-interface IMedia { images?: string[]; videos?: string[]; }
+interface ILocation { latitude: number; longitude: number; address?: string; };
+interface IJobMedia {
+  jobImages:{url:string,fileId?:string}[],
+  jobVideo:{url:string,fileId?:string}
+}
 interface IJob {
   title: string;
   jobType: string[];
@@ -18,7 +21,7 @@ interface IJob {
   createdBy: string;
   assignedTo?: string;
   status: "open" | "in-progress" | "completed" | "cancelled";
-  media?: IMedia;
+  media?: IJobMedia;
   distanceLimit: number;
   createdAt: Date | string;
   updateAt: Date | string;
@@ -94,15 +97,14 @@ const JobDetailsCompact = ({ job, isLoading, isError }: Props) => {
 
         {job.status && (
           <Badge
-            className={`px-3 py-1 text-sm mt-2 rounded ${
-              job.status === "open"
+            className={`px-3 py-1 text-sm mt-2 rounded ${job.status === "open"
                 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
                 : job.status === "in-progress"
-                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100"
-                : job.status === "completed"
-                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
-                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
-            }`}
+                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100"
+                  : job.status === "completed"
+                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
+                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
+              }`}
           >
             {job.status.toUpperCase()}
           </Badge>
@@ -114,7 +116,14 @@ const JobDetailsCompact = ({ job, isLoading, isError }: Props) => {
         <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
           {job.description || "No description provided."}
         </p>
-        {job.media && <JobMedia media={job.media} />}
+        {job.media && <JobMedia
+          media={{
+            jobImages: job?.media?.jobImages,
+            jobVideo: job?.media?.jobVideo, // only one video
+          }}
+        />
+
+        }
       </div>
     </motion.div>
   );

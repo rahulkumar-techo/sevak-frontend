@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { jobFormSchema, JobFormValues } from "../schemas/job.schema";
+import { motion } from "framer-motion"
 
 import {
   Form,
@@ -27,14 +28,17 @@ import {
 
 import MediaUpload from "./provider-comp/MediaUpload";
 import LocationInput from "./provider-comp/LocationInputs";
+import ComponentLoader from "@/components/loaders/ComponentLoader";
 
 type Props = {
   initialJobFormData?: Partial<JobFormValues>;
   onSubmitForm: (values: JobFormValues) => void;
   onPreviewChange?: (values: Partial<JobFormValues>) => void;
+  isLoading?: boolean;
+  isUpdatePage?: boolean;
 };
 
-const JobForm = ({ initialJobFormData, onSubmitForm, onPreviewChange }: Props) => {
+const JobForm = ({ initialJobFormData, onSubmitForm, onPreviewChange, isLoading, isUpdatePage }: Props) => {
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema) as any, // temporary cast for type mismatch safety
     defaultValues: {
@@ -57,12 +61,12 @@ const JobForm = ({ initialJobFormData, onSubmitForm, onPreviewChange }: Props) =
     },
   });
   const { control, handleSubmit, watch } = form;
-useEffect(() => {
-  const subscription = watch((values) => {
-   onPreviewChange?.(values as JobFormValues); 
-  });
-  return () => subscription.unsubscribe();
-}, [watch, onPreviewChange]);
+  useEffect(() => {
+    const subscription = watch((values) => {
+      onPreviewChange?.(values as JobFormValues);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, onPreviewChange]);
 
 
   const onSubmit: SubmitHandler<JobFormValues> = (values) => {
@@ -74,7 +78,9 @@ useEffect(() => {
     <div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-6 md:p-10 transition-colors duration-300">
         <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
-          Create / Edit Job
+          {
+            isUpdatePage ? "Edit Job" : "Create"
+          }
         </h2>
 
         <Form {...form}>
@@ -212,10 +218,25 @@ useEffect(() => {
 
             <Button
               type="submit"
-              className="w-full py-3 text-lg font-medium bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-400 transition-all"
+              disabled={isLoading}
+              className={`w-full flex items-center justify-center space-x-3 py-3 text-lg font-semibold text-white rounded-xl shadow-md transition-all duration-300
+    ${isLoading ? "bg-blue-500 cursor-not-allowed opacity-80" : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"}
+  `}
             >
-              Submit Job
+              {isLoading ? (
+                <>
+                  <motion.span
+                    animate={{ opacity: [1, 0.6, 1] }}
+                    transition={{ repeat: Infinity, duration: 0.8 }}
+                  >
+                    {isUpdatePage ? "Updating..." : "Creating..."}
+                  </motion.span>
+                </>
+              ) : (
+                <span>{isUpdatePage ? "Update" : "Create"}</span>
+              )}
             </Button>
+
           </form>
         </Form>
       </div>

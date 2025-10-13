@@ -8,7 +8,6 @@ import { useGetSingleQuery } from "@/redux/features/job/jobApi";
 
 const Page = () => {
   const { jobId } = useParams<{ jobId: string }>();
-
   const {
     data: jobData,
     isLoading,

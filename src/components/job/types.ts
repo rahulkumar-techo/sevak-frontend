@@ -1,7 +1,7 @@
 
 interface IMedia {
     jobImages: { url: string, fileId: string }[];
-    jobVideos: { url: string, fileId: string }[];
+    jobVideo: { url: string, fileId: string };
 }
 export interface ILocation {
     type: 'Point';

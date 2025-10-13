@@ -71,7 +71,7 @@ const JobCard: React.FC<IJobCardProps> = ({ job }) => {
           {job.status.toUpperCase()}
         </span>
         <button className="mt-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
-          <Link href={`/jobs/${job?._id}`} prefetch>
+          <Link href={`/jobs/${job?._id}`}>
             View Details
           </Link>
         </button>
