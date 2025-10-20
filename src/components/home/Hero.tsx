@@ -1,70 +1,83 @@
 "use client";
 
+import { motion } from "framer-motion";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { FiArrowRight } from "react-icons/fi";
 
 const Hero = () => {
   return (
-    <section className="relative bg-gradient-to-r from-[#37a39a] to-[#2c3e50] text-white min-h-[80vh] flex items-center mt-[60px] overflow-hidden">
-      <div className="container mx-auto px-6 lg:px-20 flex flex-col lg:flex-row items-center justify-between relative z-10">
-        
-        {/* Left Content */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="lg:w-1/2 space-y-6"
+    <section className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden bg-white dark:bg-black transition-colors duration-500">
+      <div className="relative z-10 text-center px-6 lg:px-20 max-w-4xl mx-auto">
+        {/* Main Heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-4"
         >
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
-            Find Jobs & Services <br /> Near You
-          </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-100">
-            Sevak helps you discover jobs and local services within a 20 km radius quickly and easily, even if you’re illiterate.
-          </p>
-          <div className="flex flex-wrap gap-4 mt-6">
-            <Button className="bg-white text-[#2c3e50] hover:bg-gray-100 transition-all">
-              Get Started
-            </Button>
-            <Button className="bg-transparent border border-white hover:bg-white hover:text-[#2c3e50] transition-all">
-              Learn More
-            </Button>
-          </div>
-        </motion.div>
+          <span className="bg-gradient-to-r from-[#00ff99] to-[#b3ff00] text-transparent bg-clip-text">
+            NovaNoteX
+          </span>
+          <br className="sm:hidden" />
+          <span className="bg-gradient-to-r from-[#00ff99] to-[#b3ff00] text-transparent bg-clip-text">
+            AI-Powered Notes
+          </span>
+        </motion.h1>
 
-        {/* Right Image / Illustration */}
-        <motion.div
-          animate={{ y: [0, -20, 0] }}
-          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-          className="lg:w-1/2 mt-10 lg:mt-0 flex justify-center"
+        {/* Subheading */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8"
         >
-           <div className="lg:w-80 lg:h-80 w-full max-w-lg overflow-hidden shadow-2xl rounded-full">
-            <img
-              src="/hero-image.png" // replace with your illustration
-              alt="Hero Illustration"
-              className="w-full h-auto"
-            />
-          </div>
-        </motion.div>
+          Transform handwritten and mixed-language notes into structured summaries, quizzes, and exam papers instantly.
+        </motion.p>
 
+        {/* Call-to-Action Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          <Button
+            className="inline-flex items-center justify-center px-8 py-3 bg-[#00ff99] dark:bg-[#00ff99] text-black dark:text-black font-semibold rounded-lg shadow-lg hover:bg-[#b3ff00] transition-colors duration-300 ease-in-out text-lg group"
+          >
+            Get Started
+            <FiArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </motion.div>
       </div>
 
-      {/* Animated Background Circles */}
+      {/* Floating Gradient Blobs */}
+      <motion.div
+        className="absolute inset-0 z-0 opacity-40"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5, delay: 0.8 }}
+      >
+        <div className="absolute top-1/4 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-[#00ff99] rounded-full filter blur-3xl opacity-10 animate-blob mix-blend-screen"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-[#b3ff00] rounded-full filter blur-3xl opacity-10 animate-blob animation-delay-2000 mix-blend-screen"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 sm:w-80 h-64 sm:h-80 bg-[#00ff99] rounded-full filter blur-3xl opacity-10 animate-blob animation-delay-4000 mix-blend-screen transform -translate-x-1/2 -translate-y-1/2"></div>
+      </motion.div>
+
+      {/* Subtle Rotating Shapes */}
       <motion.div
         className="absolute top-0 left-0 w-full h-full overflow-hidden"
         animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, duration: 120, ease: "linear" }}
       >
         <motion.div
-          className="absolute bg-white/10 w-72 h-72 rounded-full -top-16 -left-16"
+          className="absolute bg-black/10 dark:bg-white/10 w-64 sm:w-72 h-64 sm:h-72 rounded-full -top-16 -left-16"
           animate={{ scale: [1, 1.3, 1] }}
           transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-        ></motion.div>
+        />
         <motion.div
-          className="absolute bg-white/10 w-96 h-96 rounded-full -bottom-20 -right-32"
+          className="absolute bg-black/10 dark:bg-white/10 w-80 sm:w-96 h-80 sm:h-96 rounded-full -bottom-20 -right-32"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
-        ></motion.div>
+        />
       </motion.div>
     </section>
   );

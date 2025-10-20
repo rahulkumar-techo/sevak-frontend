@@ -9,7 +9,7 @@ export const loginSchema = z.object({
 /* 🧍 SIGNUP VALIDATION */
 export const signupSchema = z
   .object({
-    name: z
+    fullName: z
       .string()
       .trim()
       .min(2, "Name must be at least 2 characters")

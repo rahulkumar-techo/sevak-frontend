@@ -6,7 +6,7 @@ import { motion, Variants } from "framer-motion";
 
 const navitemData = [
   { name: "Home", url: "/" },
-  { name: "Jobs", url: "/jobs" },
+  { name: "Notes", url: "/notes" },
   { name: "Services", url: "/services" },
   { name: "Contact", url: "/contact" },
 ];

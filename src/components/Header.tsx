@@ -1,157 +1,141 @@
 "use client";
 
-import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import Navitems from "@/utils/Navitems";
+import Link from "next/link";
+import Image from "next/image";
 import { FiMenu, FiX } from "react-icons/fi";
-import { ModeToggle } from "./ModeToggle";
-import Profile from "./Profile";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
-import LoginComp from "./auth/Login.component";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/store";
+
+import Navitems from "@/utils/Navitems";
+import Profile from "./Profile";
+import { ModeToggle } from "./ModeToggle";
+import { Button } from "./ui/button";
 import { useMyProfileQuery } from "@/redux/features/auth/authApi";
+import { logo } from "../../public";
 
 type Props = {
   activeItem: number;
-
 };
 
-const Header = ({ activeItem, }: Props) => {
-  const [active, setActive] = useState(false);
-  const [open, setOpen] = useState(false);
+const Header: React.FC<Props> = ({ activeItem }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const [isLogedIn, setIsLoggedIn] = useState<boolean>(false);
-
 
   const { data: userQuery } = useMyProfileQuery();
   const { user } = useSelector((state: RootState) => state.auth);
-
-  console.log("userQuery===========>", userQuery, user)
-
-  useEffect(() => {
-    if (user || userQuery) {
-      setIsLoggedIn(!!user || !!userQuery)
-    }
-  }, [user, userQuery])
-
-  // Scroll effect
-  useEffect(() => {
-    const handleScroll = () => setActive(window.scrollY > 85);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const isLoggedIn = !!user || !!userQuery;
 
   // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
+        setMenuOpen(false);
       }
     };
-    if (open) document.addEventListener("mousedown", handleClickOutside);
+    if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
-
-
-
+  }, [menuOpen]);
 
   return (
-    <header
-      className={`w-full z-[80] fixed top-0 left-0 transition-all duration-300 border-b border-gray-300 dark:border-[#ffffff1c]
-        ${active ? "bg-white/70 dark:bg-gray-900/70 shadow-lg backdrop-blur-md" : "bg-transparent"}
-      `}
-    >
-      <div className="w-[95%] lg:w-[92%] mx-auto h-[60px] flex items-center justify-between">
+    <header className="fixed top-0 left-0 w-full z-50 bg-white dark:bg-black shadow-md transition-colors duration-500">
+      <div className="w-[95%] lg:w-[92%] mx-auto h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link
-          href="/"
-          className="text-[20px] sm:text-[22px] md:text-[24px] lg:text-[25px] font-poppins font-bold dark:text-white text-black"
-        >
-          Sevak
+        <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
+          <Image
+            src={logo}
+            alt="NovaNoteX Logo"
+            width={140}
+            height={35}
+            className="object-contain w-24 h-7 sm:w-28 sm:h-8"
+          />
+          <div className="flex flex-col leading-tight">
+            <span className="font-bold text-base sm:text-lg bg-gradient-to-r from-[#00ff99] to-[#b3ff00] text-transparent bg-clip-text">
+              NovaNoteX
+            </span>
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-300">AI Notes</span>
+          </div>
         </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center space-x-6">
           <Navitems activeItem={activeItem} isMobile={false} />
           <ModeToggle theme="" />
-          {
-            isLogedIn && <Profile
+          {isLoggedIn ? (
+            <Profile
               avatar={user?.avatar?.url}
               fullName={user?.fullName}
               email={user?.email}
               id={user?._id || ""}
               roles={user?.roles}
             />
-          }
-          {
-            !isLogedIn && <LoginComp />
-          }
+          ) : (
+            <Button className="bg-[#00ff99] text-black hover:bg-[#b3ff00]">
+              <Link href="/auth/login">Login</Link>
+            </Button>
+          )}
         </nav>
 
-        {/* Mobile */}
+        {/* Mobile Nav */}
         <div className="lg:hidden flex items-center gap-4">
           <ModeToggle theme="" />
-          {
-            isLogedIn && <Profile
+          {isLoggedIn ? (
+            <Profile
               avatar={user?.avatar?.url}
               fullName={user?.fullName}
+              email={user?.email}
               id={user?._id || ""}
-              email={user?.email} 
               roles={user?.roles}
-              />
-              
+            />
+          ) : (
+            <Button className="bg-[#00ff99] text-black hover:bg-[#b3ff00]">
+              <Link href="/auth/login">Login</Link>
+            </Button>
+          )}
 
-          }
-          {
-            !isLogedIn && <LoginComp />
-          }
-
-          {
-            !open && <button
-              onClick={() => setOpen(!open)}
-              className="text-2xl text-black dark:text-white"
-            >
-              {open ? <FiX /> : <FiMenu />}
-            </button>
-          }
+          <button onClick={() => setMenuOpen(!menuOpen)} className="text-2xl text-gray-800 dark:text-white">
+            {menuOpen ? <FiX /> : <FiMenu />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Menu with Animation */}
+      {/* Mobile Side Menu */}
       <AnimatePresence>
-        {open && (
+        {menuOpen && (
           <>
-            {/* Overlay (click outside to close) */}
             <motion.div
-              className="fixed top-0 left-0 w-full h-full bg-black/40 z-40"
+              className="fixed inset-0 bg-black/50 z-40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             />
 
-            {/* Side Menu */}
             <motion.div
               ref={menuRef}
-              className="fixed top-0 left-0 w-[70%] sm:w-[50%] h-full bg-white dark:bg-gray-900 z-50 shadow-lg flex flex-col"
+              className="fixed top-0 left-0 w-3/4 sm:w-1/2 h-full bg-white dark:bg-black text-black dark:text-white z-50 shadow-lg flex flex-col"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 80, damping: 15 }}
             >
-              <div className="flex justify-between items-center p-5 border-b border-gray-300 dark:border-[#ffffff1c]">
-                <Link
-                  href="/"
-                  className="text-[22px] font-poppins font-bold dark:text-white text-black"
-                  onClick={() => setOpen(false)}
-                >
-                  Sevak
+              <div className="flex justify-between items-center p-5 border-b border-gray-200 dark:border-gray-700">
+                <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
+                  <Image
+                    src={logo}
+                    alt="NovaNoteX Logo"
+                    width={140}
+                    height={35}
+                    className="object-contain w-28 h-8 sm:w-32 sm:h-10"
+                  />
+                  <div className="flex flex-col leading-tight">
+                    <span className="font-bold text-base sm:text-lg bg-gradient-to-r from-[#00ff99] to-[#b3ff00] text-transparent bg-clip-text">
+                      NovaNoteX
+                    </span>
+                    <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-300">AI Notes</span>
+                  </div>
                 </Link>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="text-2xl text-black dark:text-white"
-                >
+                <button onClick={() => setMenuOpen(false)} className="text-2xl text-gray-800 dark:text-white">
                   <FiX />
                 </button>
               </div>

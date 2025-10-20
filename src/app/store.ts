@@ -3,10 +3,12 @@ import { apiSlice } from "@/redux/features/apis/apiSlice";
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/redux/features/auth/authSlice";
 import jobReducer from "@/redux/features/job/jobSlice"
+import noteReducer from "@/redux/features/note/noteSlice"
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     job:jobReducer,
+    note:noteReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   // devTools:false,

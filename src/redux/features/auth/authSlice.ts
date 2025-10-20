@@ -11,15 +11,18 @@ interface AuthState {
         avatar?: any;
     } | null;
     isAuthenticated: boolean;
+    roles: string[]
 }
 
 const initialState: AuthState = {
     user: null,
     isAuthenticated: false,
+    roles: []
 };
 
 interface AuthPayload {
     user?: AuthState["user"];
+    roles?: string[]
 }
 
 const authSlice = createSlice({
@@ -35,6 +38,8 @@ const authSlice = createSlice({
         setUser: (state, action: PayloadAction<AuthPayload>) => {
             if (action.payload.user) {
                 state.user = { ...(state.user || {}), ...action.payload.user };
+                if (action?.payload?.roles)
+                    state.roles = action?.payload?.roles
                 state.isAuthenticated = !!action.payload.user;
             }
         },
@@ -51,5 +56,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { userRegistration, userLoggedIn, logout,setUser } = authSlice.actions;
+export const { userRegistration, userLoggedIn, logout, setUser } = authSlice.actions;
 export default authSlice.reducer;

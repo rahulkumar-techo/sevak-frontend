@@ -10,7 +10,6 @@ import toast from "react-hot-toast";
 export type Preferences = {
   notifications: boolean;
   theme: "light" | "dark" | "system";
-
 };
 
 type Props = {
@@ -21,34 +20,24 @@ type Props = {
   onSave?: (data: Preferences) => void;
 };
 
-const PreferencesSection = ({ preferences, onSave ,isLoading,isSuccess,error}: Props) => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(preferences?.notifications ?? true);
+const PreferencesSection = ({ preferences, onSave, isLoading, isSuccess, error }: Props) => {
+  const [notificationsEnabled, setNotificationsEnabled] = useState(preferences?.notifications ?? true);
   const [theme, setTheme] = useState<"light" | "dark" | "system">(preferences?.theme ?? "system");
   const [isEditing, setIsEditing] = useState(false);
+
   useEffect(() => {
     if (isSuccess) {
-      toast.success("Preferences updateSuccessfully")
+      toast.success("Preferences updated successfully!");
       setIsEditing(false);
     }
     if (error) {
-      const msg = error?.data?.message || "failed to update"
-      toast.error(msg)
+      toast.error(error?.data?.message || "Failed to update preferences");
     }
+    setNotificationsEnabled(preferences?.notifications ?? true);
+    setTheme(preferences?.theme ?? "system");
+  }, [preferences, isSuccess, error]);
 
-    if(preferences?.notifications||preferences?.theme ){
-      setNotificationsEnabled(preferences?.notifications)
-      setTheme(preferences?.theme )
-    }
-  }, [error,preferences?.notifications,preferences?.theme ])
-
-
-
-  const handleSave = () => {
-   
-    onSave?.({ notifications: notificationsEnabled, theme });
-
-  };
-
+  const handleSave = () => onSave?.({ notifications: notificationsEnabled, theme });
   const handleCancel = () => {
     setNotificationsEnabled(preferences?.notifications ?? true);
     setTheme(preferences?.theme ?? "system");
@@ -56,13 +45,13 @@ const PreferencesSection = ({ preferences, onSave ,isLoading,isSuccess,error}: P
   };
 
   return (
-    <Card className="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 shadow-md rounded-2xl mt-6">
+    <Card className="w-full bg-gradient-to-r from-[#00ff99]/10 to-[#b3ff00]/10 border border-gray-300 dark:border-gray-700 shadow-lg rounded-2xl mt-6">
       <CardHeader className="flex items-center justify-between pb-2">
-        <CardTitle className="text-lg text-gray-900 dark:text-gray-100">Preferences</CardTitle>
+        <CardTitle className="text-lg font-bold text-gray-900 dark:text-white">Preferences</CardTitle>
         {!isEditing && (
           <Button
             size="sm"
-            className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600"
+            className="border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
             onClick={() => setIsEditing(true)}
           >
             Edit
@@ -71,17 +60,11 @@ const PreferencesSection = ({ preferences, onSave ,isLoading,isSuccess,error}: P
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6 pt-2">
-        {/* Notifications */}
         <div className="flex items-center justify-between">
           <span className="text-gray-700 dark:text-gray-300">Enable Notifications</span>
-          <Switch
-            checked={notificationsEnabled}
-            onCheckedChange={setNotificationsEnabled}
-            disabled={!isEditing}
-          />
+          <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} disabled={!isEditing} />
         </div>
 
-        {/* Theme selection */}
         <div className="flex flex-col gap-2">
           <span className="text-gray-700 dark:text-gray-300">Theme</span>
           <RadioGroup
@@ -92,33 +75,19 @@ const PreferencesSection = ({ preferences, onSave ,isLoading,isSuccess,error}: P
             {["light", "dark", "system"].map((t) => (
               <div key={t} className="flex items-center gap-1">
                 <RadioGroupItem value={t} id={`theme-${t}`} disabled={!isEditing} />
-                <label htmlFor={`theme-${t}`} className="text-gray-700 dark:text-gray-300 capitalize">
-                  {t}
-                </label>
+                <label htmlFor={`theme-${t}`} className="text-gray-700 dark:text-gray-300 capitalize">{t}</label>
               </div>
             ))}
           </RadioGroup>
         </div>
 
-        {/* Save / Cancel Buttons */}
         {isEditing && (
           <div className="flex gap-2 justify-end mt-4">
-            <Button
-              size="sm"
-              className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600"
-              onClick={handleCancel}
-            >
+            <Button size="sm" className="border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white"
-              onClick={handleSave}
-              disabled={isLoading}
-            >
-              {
-                isLoading ? "Saving..." : "Save"
-              }
+            <Button size="sm" className="bg-[#00ff99] hover:bg-[#b3ff00] text-black font-semibold" onClick={handleSave} disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </div>
         )}

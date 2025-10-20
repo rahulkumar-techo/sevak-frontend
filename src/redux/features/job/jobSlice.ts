@@ -3,13 +3,15 @@ import { IJob } from "@/components/job/types";
 
 interface JobState {
   jobs: IJob[];           // List of all jobs
-  selectedJob?: IJob;     // Currently viewed/edited job
+  selectedJob?: IJob;
+  selectUserCreatedJobs: Partial<IJob>[]     // Currently viewed/edited job
 }
 
 const initialState: JobState = {
   jobs: [],
   selectedJob: undefined,
-  
+  selectUserCreatedJobs: []
+
 };
 
 const jobSlice = createSlice({
@@ -50,8 +52,12 @@ const jobSlice = createSlice({
         state.selectedJob = undefined;
       }
     },
+    // User selectedJobs 
+    jobsCreatedByuser: (state, action) => {
+      state.selectUserCreatedJobs = action.payload;
+    }
   },
 });
 
-export const { setJobs, addJob, updateJob, setSelectedJob, removeJob } = jobSlice.actions;
+export const { setJobs, addJob, updateJob, setSelectedJob, removeJob,jobsCreatedByuser } = jobSlice.actions;
 export default jobSlice.reducer;

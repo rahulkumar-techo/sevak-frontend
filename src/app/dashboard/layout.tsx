@@ -1,36 +1,38 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "./components/app-sidebar";
+import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import {
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset
+} from "@/components/ui/sidebar";
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-export default function Layout({ children }: LayoutProps) {
-
+export default function StudentLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="flex relative min-h-screen bg-gray-50 dark:bg-gray-950 w-full">
-        {/* Sidebar */}
-        <AppSidebar role="provider" jobId="1"/>
+      {/* Sidebar stays on left */}
+      <AppSidebar
+        role="student"
+        user={{
+          name: "Rahul Kumar",
+          email: "rahul@student.com",
+          avatarUrl: ""
+        }}
+      />
 
-        {/* Main Content */}
-        <motion.main
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="flex-1 min-h-screen overflow-y-auto  w-full"
-        >
-          {/* Optional sidebar trigger for mobile */}
-          <SidebarTrigger className=" absolute top-1" />
+      {/* This makes content take FULL remaining width */}
+      <SidebarInset className="flex flex-col w-full h-screen">
+        {/* Top Header */}
+        <header className="h-12 flex items-center px-4 border-b">
+          <SidebarTrigger />
+          <h1 className="ml-4 font-semibold">Student Panel</h1>
+        </header>
 
-          {/* Content */}
-          <div className="w-full">{children}</div>
-        </motion.main>
-      </div>
+        {/* Page Content Full Width */}
+        <main className="flex-1 w-full overflow-auto p-4 ">
+          {children}
+        </main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }

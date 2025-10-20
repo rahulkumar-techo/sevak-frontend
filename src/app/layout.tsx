@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import {Toaster} from "react-hot-toast"
 import ReduxProvider from "./Provider";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,6 +33,8 @@ export const metadata: Metadata = {
   title: "Sevak - Find Jobs & Services Near You",
   description:
     "Sevak helps users easily find jobs and services within a 20 km radius using geolocation. Simple, fast, and accessible even for illiterate users.",
+    manifest:"/favicongenerator.io/manifest.json",
+    icons:"/favicongenerator.io/favicon.ico"
 };
 
 export default function RootLayout({

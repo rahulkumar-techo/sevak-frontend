@@ -27,6 +27,7 @@ type ProfileProps = {
 const ProfileDropdown = ({ avatar, fullName, email, id, roles }: Partial<ProfileProps>) => {
 
   const router = useRouter()
+  console.log("avatar",avatar)
   const nameSlug = fullName?.toLowerCase().replace(/\s+/g, "-");
   // useSelector(user?.avatar?.url)
   const [logoutUser, { isLoading }] = useLogOutMutation()
@@ -41,17 +42,7 @@ const ProfileDropdown = ({ avatar, fullName, email, id, roles }: Partial<Profile
 
   console.log(roles)
   const handleDashboard = () => {
-    if (roles?.includes("admin")) {
-      router.push("/dashboard/admin"); // redirect after logout
-
-    }
-    if (roles?.includes("user")) {
-      router.push("/dashboard/user"); // redirect after logout
-
-    }
-    if (roles?.includes("provider")) {
-      router.push("/dashboard/provider"); // redirect after logout
-    }
+    router.push("/dashboard")
   }
 
   return (
