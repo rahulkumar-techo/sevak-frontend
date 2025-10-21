@@ -9,6 +9,7 @@ import NoteCategorySelector from "./NotesCategorySelector";
 export type NoteFile = {
   url?: string;
   file?: File;
+  fileId?: string;
   type: "image" | "pdf";
 };
 
@@ -25,6 +26,7 @@ type Props = {
   isEdit?: boolean;
   isLoading?: boolean;
   onSave: (data: NoteData) => void;
+
 };
 
 const NoteForm: React.FC<Props> = ({ initialData, isEdit = false, isLoading = false, onSave }) => {
@@ -33,9 +35,7 @@ const NoteForm: React.FC<Props> = ({ initialData, isEdit = false, isLoading = fa
   const [description, setDescription] = useState(initialData?.description || "");
   const [files, setFiles] = useState<NoteFile[]>(initialData?.notesFiles || []);
   const [category, setCategory] = useState(initialData?.category);
-
-  console.log(files)
-
+  const [deletedItems, setDeletedItems] = useState<string[]>([]);
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title || "");
@@ -49,8 +49,13 @@ const NoteForm: React.FC<Props> = ({ initialData, isEdit = false, isLoading = fa
   const handleSave = () => {
     if (!title.trim() || !subject.trim()) return alert("Title and Subject are required!");
     onSave({ title, subject, description, notesFiles: files, category });
+    // Send deleted files (for DB cleanup)
   };
-
+  // ✅ Receive both files & deletedItems from uploader
+  const handleFilesSelect = (updatedFiles: NoteFile[], deleted: string[]) => {
+    setFiles(updatedFiles);
+    setDeletedItems(deleted);
+  };
   return (
     <div className="flex flex-col gap-4 bg-black-900 p-4 rounded-xl shadow-lg">
       <h2 className="text-lg font-bold text-white">{isEdit ? "Edit Note" : "Create Note"}</h2>

@@ -4,27 +4,32 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash, UploadCloud, FileText } from "lucide-react";
 import { NoteFile } from "./NoteForm";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/app/store";
+import { setManageDeleteItems } from "@/redux/features/note/noteSlice";
+import { de } from "zod/v4/locales";
 
-type Props = {
-  initialFiles?: NoteFile[];
-  onFilesSelect?: (files: NoteFile[]) => void;
-};
+
+type Props = { initialFiles?: NoteFile[]; onFilesSelect?: (files: NoteFile[], deletedItems: string[]) => void; };
 
 const MultiFileUploader: React.FC<Props> = ({ initialFiles = [], onFilesSelect }) => {
   const [files, setFiles] = useState<NoteFile[]>([]);
+  const [deletedItems, setDeletedItems] = useState<string[]>([]);
+  const dispatch = useDispatch<AppDispatch>()
 
-
-  // Sync initial files (for edit mode)
-useEffect(() => {
+  // ✅ Set initial files only ONCE on edit
+  useEffect(() => {
     if (initialFiles.length > 0 && files.length === 0) {
       setFiles(initialFiles);
     }
   }, [initialFiles]);
 
+  // ✅ Sync with parent whenever files OR deleted items change
   useEffect(() => {
-    onFilesSelect?.(files);
-  }, [files]);
+    onFilesSelect?.(files, deletedItems);
+  }, [files, deletedItems]);
 
+  // ✅ File Selection
   const handleFiles = (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
 
@@ -48,13 +53,31 @@ useEffect(() => {
       return;
     }
 
-    setFiles([...files, ...newFiles]);
+    setFiles((prev) => [...prev, ...newFiles]);
   };
 
-  const handleRemoveFile = (index: number) => setFiles(files.filter((_, i) => i !== index));
+  useEffect(()=>{
+    if(deletedItems&&deletedItems.length>0){
+        dispatch(setManageDeleteItems(deletedItems))
+    }
+  },[deletedItems])
+
+  // ✅ Remove File + Track Deleted DB Items
+  const handleRemoveFile = (index: number) => {
+    const fileToDelete = files[index];
+
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+
+    if (fileToDelete?.fileId) {
+      setDeletedItems((prev) => [...prev, fileToDelete.fileId as string]);
+    }
+  };
+const {manageDeleteItems} = useSelector((state:RootState)=>state.note)
+
 
   return (
     <div className="flex flex-col gap-2">
+      {/* Upload Box */}
       <div
         onClick={() => document.getElementById("fileInput")?.click()}
         className="border-2 border-dashed p-3 flex items-center justify-center gap-2 cursor-pointer hover:border-blue-400"
@@ -71,6 +94,7 @@ useEffect(() => {
         />
       </div>
 
+      {/* File List */}
       {files.length > 0 && (
         <div className="border rounded-md divide-y">
           {files.map((file, index) => (

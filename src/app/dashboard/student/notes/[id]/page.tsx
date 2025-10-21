@@ -6,6 +6,8 @@ import toast from "react-hot-toast";
 
 import NoteForm, { NoteData } from "@/components/notes/NoteForm";
 import { useGetSingleNoteQuery, useUpdateNoteMutation } from "@/redux/features/note/noteApi";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/store";
 
 const EditNotePage: React.FC = () => {
   const router = useRouter();
@@ -14,6 +16,8 @@ const EditNotePage: React.FC = () => {
 
   const { data, isFetching, error } = useGetSingleNoteQuery({ id: noteId });
   const [updateNote, { isLoading, isSuccess, error: updateError }] = useUpdateNoteMutation();
+
+  const { manageDeleteItems } = useSelector((state: RootState) => state.note);
 
   const [initialData, setInitialData] = useState<NoteData | undefined>();
 
@@ -30,8 +34,6 @@ const EditNotePage: React.FC = () => {
     }
   }, [data]);
 
-  console.log({initialData:initialData?.category})
-
   useEffect(() => {
     if (updateError) {
       toast.error((updateError as any)?.data?.message || "Failed to update note");
@@ -42,22 +44,27 @@ const EditNotePage: React.FC = () => {
     }
   }, [updateError, isSuccess]);
 
-  const handleUpdate = async (data: NoteData) => {
+  const handleUpdate = async (formData: NoteData) => {
     try {
-      // await updateNote({
+      // Separate files into image[] and pdf (same format as createNote)
+      const imageFiles = formData.notesFiles
+        ?.filter((f) => f.file && f.type === "image")
+        .map((f) => f.file!) as File[];
 
-      //   id: noteId,
-      //   title: data.title||"",
-      //   subject: data.subject||"",
-      //   description: data.description||"",
-      //   category: data.category,
-      //   files: {
-      //     noteImages: data.notesFiles?.filter(f => f.file && f.type === "image").map(f => f.file!) || [],
-      //     notePdf: data.notesFiles?.find(f => f.file && f.type === "pdf")?.file || null,
-      //   },
-      // }).unwrap();
+      const pdfFile = formData.notesFiles?.find((f) => f.file && f.type === "pdf")?.file || null;
 
-      console.log(data)
+      await updateNote({
+        id: noteId,
+        title: formData.title!,
+        description: formData.description!,
+        subject: formData.subject,
+        category: formData.category,
+        files: {
+          noteImages: imageFiles,
+          notePdf: pdfFile,
+        },
+        deleteItems: manageDeleteItems, // ✅ send deleted file IDs
+      }).unwrap();
     } catch (err) {
       console.error("Update note failed:", err);
     }

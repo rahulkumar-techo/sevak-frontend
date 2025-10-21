@@ -16,6 +16,7 @@ export interface INotePayload {
     subject?: string;
     category?: Record<string, any>;
     files?: INoteFiles;
+
 }
 
 export interface IUpdatePayload {
@@ -25,6 +26,7 @@ export interface IUpdatePayload {
     subject?: string;
     category?: Record<string, any>;
     files?: INoteFiles;
+     deleteItems?:string[]
 }
 
 export interface INoteQueryParams {
@@ -35,13 +37,18 @@ export interface INoteQueryParams {
 }
 
 /** Helper: Convert payload to FormData */
-const buildFormData = (data: INotePayload) => {
+const buildFormData = (data: INotePayload|IUpdatePayload) => {
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("description", data.description);
 
     if (data.subject) formData.append("subject", data.subject);
     if (data.category) formData.append("category", JSON.stringify(data.category));
+    // Deleted Items (for update)
+if ("deleteItems" in data && data.deleteItems && Array.isArray(data.deleteItems)) {
+    formData.append("deleteItems", JSON.stringify(data.deleteItems));
+}
+
 
     // Images
     if (data.files?.noteImages && Array.isArray(data.files.noteImages)) {
@@ -103,7 +110,7 @@ export const noteApi = apiSlice.injectEndpoints({
             query: ({ id, ...data }: IUpdatePayload) => {
                 const formData = buildFormData(data);
                 return {
-                    url: `/api/notes/${id}`,
+                    url: `/note/${id}`,
                     method: "PUT",
                     body: formData,
                     credentials: "include",

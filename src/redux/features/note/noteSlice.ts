@@ -10,6 +10,7 @@ import { Note } from "@/components/notes/NoteCard";
 interface NotesState {
   selectedNote?: Note | null;
   searchQuery: string;
+  manageDeleteItems?:string[];
   currentPage: number;
   notesPerPage: number;
 }
@@ -19,6 +20,7 @@ const initialState: NotesState = {
   searchQuery: "",
   currentPage: 1,
   notesPerPage: 10,
+  manageDeleteItems:[]
 };
 
 const notesSlice = createSlice({
@@ -27,6 +29,9 @@ const notesSlice = createSlice({
   reducers: {
     setSelectedNote: (state, action: PayloadAction<Note | null>) => {
       state.selectedNote = action.payload;
+    },
+    setManageDeleteItems: (state, action: PayloadAction<string[] | []>) => {
+      state.manageDeleteItems = action.payload;
     },
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
@@ -54,6 +59,7 @@ export const {
   setCurrentPage,
   setNotesPerPage,
   resetNotesState,
+  setManageDeleteItems
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
